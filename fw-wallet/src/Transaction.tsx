@@ -6,7 +6,7 @@ import {
 import { Button } from "@coinbase/cdp-react/components/ui/Button";
 import { LoadingSkeleton } from "@coinbase/cdp-react/components/ui/LoadingSkeleton";
 import { useMemo, useState } from "react";
-import { cryptoConfig, formatTransaction } from "./crypto-config";
+import { cryptoConfig, formatTransaction, createERC20TransferTransaction } from "./crypto-config";
 
 interface Props {
   balance?: string;
@@ -31,15 +31,17 @@ function Transaction(props: Props) {
     return balance && balance !== "0";
   }, [balance]);
 
+  // Hardcoded destination address
+  const destinationAddress = '0x16520479fd477d5A2E5481b56cFC0E79E156159E';
+  
   const transaction = useMemo<SendTransactionButtonProps["transaction"]>(() => {
-    return {
-      to: evmAddress, // Send to yourself for testing
-      value: 1000000000000n, // 0.000001 ETH in wei
-      gas: 21000n,
-      chainId: cryptoConfig.network.chainId,
-      type: "eip1559",
-    };
-  }, [evmAddress]);
+    // For PYUSD, we need to send a much smaller amount due to decimals (6 vs 18)
+    // 1000000 = 1 PYUSD (with 6 decimals)
+    const amount = cryptoConfig.token.symbol === 'PYUSD' ? 1000000n : 1000000000000n;
+    
+    // Use our helper function to create the appropriate transaction with hardcoded destination
+    return createERC20TransferTransaction(destinationAddress, amount);
+  }, []);
 
   const handleTransactionError: SendTransactionButtonProps["onError"] = error => {
     setTransactionHash("");
@@ -82,11 +84,18 @@ function Transaction(props: Props) {
               <h2 className="card-title">Send a transaction</h2>
               {hasBalance && evmAddress && (
                 <>
-                  <p>Send 0.000001 {cryptoConfig.token.symbol} to yourself on {cryptoConfig.network.name}</p>
+                  <p>Send {cryptoConfig.token.symbol === 'PYUSD' ? '1' : '0.000001'} {cryptoConfig.token.symbol} to <code>{destinationAddress.slice(0, 6)}...{destinationAddress.slice(-4)}</code> on {cryptoConfig.network.name}</p>
+                  
+                  {cryptoConfig.token.contractAddress && (
+                    <p className="gas-notice">
+                      <small>Note: You need ETH on {cryptoConfig.network.name} to pay for gas fees when sending {cryptoConfig.token.symbol}.</small>
+                    </p>
+                  )}
+                  
                   <div className="transaction-button-container">
                     <SendTransactionButton
                       account={evmAddress}
-                      network="base-sepolia"
+                      network={cryptoConfig.network.name === 'Ethereum Sepolia' ? 'ethereum-sepolia' : 'base-sepolia'}
                       transaction={transaction}
                       onError={handleTransactionError}
                       onSuccess={handleTransactionSuccess}
