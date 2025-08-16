@@ -1,19 +1,10 @@
 import { useEvmAddress, useIsSignedIn } from "@coinbase/cdp-hooks";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { createPublicClient, http, formatEther } from "viem";
-import { baseSepolia } from "viem/chains";
+import { useCallback, useEffect, useState } from "react";
 
 import Header from "./Header";
 import Transaction from "./Transaction";
 import UserBalance from "./UserBalance";
-
-/**
- * Create a viem client to access user's balance on the Base Sepolia network
- */
-const client = createPublicClient({
-  chain: baseSepolia,
-  transport: http(),
-});
+import { getTokenBalance, formatBalance } from "./crypto-config";
 
 /**
  * The Signed In screen
@@ -23,16 +14,13 @@ function SignedInScreen() {
   const { evmAddress } = useEvmAddress();
   const [balance, setBalance] = useState<bigint | undefined>(undefined);
 
-  const formattedBalance = useMemo(() => {
-    if (balance === undefined) return undefined;
-    return formatEther(balance);
-  }, [balance]);
+  // Format balance using our utility function
+  const formattedBalance = balance !== undefined ? formatBalance(balance) : undefined;
 
   const getBalance = useCallback(async () => {
     if (!evmAddress) return;
-    const balance = await client.getBalance({
-      address: evmAddress,
-    });
+    // Use our getTokenBalance utility function
+    const balance = await getTokenBalance(evmAddress);
     setBalance(balance);
   }, [evmAddress]);
 

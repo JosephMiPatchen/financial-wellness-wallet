@@ -6,6 +6,7 @@ import {
 import { Button } from "@coinbase/cdp-react/components/ui/Button";
 import { LoadingSkeleton } from "@coinbase/cdp-react/components/ui/LoadingSkeleton";
 import { useMemo, useState } from "react";
+import { cryptoConfig, formatTransaction } from "./crypto-config";
 
 interface Props {
   balance?: string;
@@ -35,7 +36,7 @@ function Transaction(props: Props) {
       to: evmAddress, // Send to yourself for testing
       value: 1000000000000n, // 0.000001 ETH in wei
       gas: 21000n,
-      chainId: 84532, // Base Sepolia
+      chainId: cryptoConfig.network.chainId,
       type: "eip1559",
     };
   }, [evmAddress]);
@@ -81,7 +82,7 @@ function Transaction(props: Props) {
               <h2 className="card-title">Send a transaction</h2>
               {hasBalance && evmAddress && (
                 <>
-                  <p>Send 0.000001 ETH to yourself on Base Sepolia</p>
+                  <p>Send 0.000001 {cryptoConfig.token.symbol} to yourself on {cryptoConfig.network.name}</p>
                   <div className="transaction-button-container">
                     <SendTransactionButton
                       account={evmAddress}
@@ -99,11 +100,11 @@ function Transaction(props: Props) {
                   <p>
                     Get some from{" "}
                     <a
-                      href="https://portal.cdp.coinbase.com/products/faucet"
+                      href={cryptoConfig.token.faucetUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Base Sepolia Faucet
+                      {cryptoConfig.network.name} Faucet
                     </a>
                   </p>
                 </>
@@ -116,7 +117,7 @@ function Transaction(props: Props) {
               <p>
                 Transaction hash:{" "}
                 <a
-                  href={`https://sepolia.basescan.org/tx/${transactionHash}`}
+                  href={formatTransaction(transactionHash)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transaction-hash-link"

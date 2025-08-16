@@ -1,4 +1,5 @@
 import { LoadingSkeleton } from "@coinbase/cdp-react/components/ui/LoadingSkeleton";
+import { cryptoConfig } from "./crypto-config";
 
 interface Props {
   balance?: string;
@@ -20,22 +21,21 @@ function UserBalance(props: Props) {
         {balance === undefined && <LoadingSkeleton as="span" className="loading--balance" />}
         {balance !== undefined && (
           <span className="flex-row-container">
-            <img src="/eth.svg" alt="" className="balance-icon" />
+            <img src={cryptoConfig.token.iconPath} alt="" className="balance-icon" />
             <span>{balance}</span>
-            <span className="sr-only">Ethereum</span>
+            <span className="sr-only">{cryptoConfig.token.name}</span>
           </span>
         )}
       </p>
-      <p>
-        Get testnet ETH from{" "}
+      <div className="faucet-link">
         <a
-          href="https://portal.cdp.coinbase.com/products/faucet"
+          href={cryptoConfig.token.faucetUrl}
           target="_blank"
           rel="noopener noreferrer"
         >
-          Base Sepolia Faucet
+          Get {cryptoConfig.token.symbol} from faucet
         </a>
-      </p>
+      </div>
     </>
   );
 }
