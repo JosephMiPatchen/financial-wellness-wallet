@@ -96,3 +96,10 @@ This implementation plan focuses on creating a simple but effective "cash envelo
 - Swipeable interfaces for envelope management
 - Minimal chrome to maximize content area on small screens
 - Focus on the envelope metaphor as the central organizing principle
+
+## Notes: 
+
+
+### Always use BudgetmentManagent class we made
+
+### Make sure you code is modual dont event have cpmoponents that go over 200 lines

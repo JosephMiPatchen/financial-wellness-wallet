@@ -2,10 +2,12 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useEvmAddress } from "@coinbase/cdp-hooks";
 import { getTokenBalance, formatBalance } from "../../crypto-config";
 import { BudgetProvider, useBudget } from '../../context/BudgetContext';
-import type { BudgetAllocation } from '../../budget';
+import type { ExtendedBudgetAllocation } from '../../budget/extended-types';
 
 import MobileLayout from '../layout/MobileLayout';
 import Dashboard from '../pages/Dashboard';
+import BudgetManagement from '../pages/BudgetManagement';
+import Settings from '../pages/Settings';
 import TransactionModal from '../ui/TransactionModal';
 import Header from '../../Header';
 
@@ -48,7 +50,7 @@ const EnvelopeAppContent: React.FC = () => {
   const handleSendTransaction = async (
     amount: string, 
     recipient: string, 
-    allocation: BudgetAllocation
+    allocation: ExtendedBudgetAllocation
   ) => {
     if (!evmAddress) return;
     
@@ -91,19 +93,9 @@ const EnvelopeAppContent: React.FC = () => {
           />
         );
       case 'budget':
-        return (
-          <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Budget Management</h2>
-            <p className="text-gray-500">Budget management features coming soon!</p>
-          </div>
-        );
+        return <BudgetManagement />;
       case 'settings':
-        return (
-          <div className="p-4">
-            <h2 className="text-xl font-bold mb-4">Settings</h2>
-            <p className="text-gray-500">Settings features coming soon!</p>
-          </div>
-        );
+        return <Settings />;
       default:
         return null;
     }

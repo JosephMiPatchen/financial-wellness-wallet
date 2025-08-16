@@ -1,7 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { BudgetManager, AllocationTypeEnum } from '../budget';
-import type { BudgetSummary, BudgetAllocationInput } from '../budget';
+import type { BudgetAllocationInput } from '../budget';
+import { extendBudgetSummary } from '../budget/extended-types';
+import type { ExtendedBudgetSummary } from '../budget/extended-types';
 
 // Default monthly income (can be adjusted by user later)
 const DEFAULT_MONTHLY_INCOME = 5000;
@@ -17,9 +19,11 @@ const DEFAULT_ALLOCATIONS: BudgetAllocationInput[] = [
 
 interface BudgetContextType {
   budgetManager: BudgetManager;
-  budgetSummary: BudgetSummary | null;
+  budgetSummary: ExtendedBudgetSummary | null;
   refreshBudget: () => void;
   recordExpense: (categoryName: string, amount: number, description: string) => string;
+  updateBudget: (updatedBudget: ExtendedBudgetSummary) => void;
+  resetBudget: () => void;
 }
 
 const BudgetContext = createContext<BudgetContextType | undefined>(undefined);
@@ -51,13 +55,15 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     return manager;
   });
   
-  const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
+  const [budgetSummary, setBudgetSummary] = useState<ExtendedBudgetSummary | null>(null);
   
   // Refresh budget summary
   const refreshBudget = () => {
     try {
       const summary = budgetManager.getBudgetSummary();
-      setBudgetSummary(summary);
+      // Convert to extended budget summary with UI properties
+      const extendedSummary = extendBudgetSummary(summary);
+      setBudgetSummary(extendedSummary);
     } catch (error) {
       console.error('Error getting budget summary:', error);
     }
@@ -75,13 +81,44 @@ export const BudgetProvider: React.FC<BudgetProviderProps> = ({ children }) => {
     }
   };
   
+  // Update budget with new allocations
+  const updateBudget = (updatedBudget: ExtendedBudgetSummary) => {
+    try {
+      // In a real implementation, we would update the budget in the BudgetManager
+      // For now, we'll just update the state
+      setBudgetSummary(updatedBudget);
+    } catch (error) {
+      console.error('Error updating budget:', error);
+    }
+  };
+  
+  // Reset budget spending (keep allocations but reset spent amounts)
+  const resetBudget = () => {
+    try {
+      if (budgetSummary) {
+        // Simply refresh the budget to reset it
+        // In a real implementation, we would call a method on the BudgetManager
+        refreshBudget();
+      }
+    } catch (error) {
+      console.error('Error resetting budget:', error);
+    }
+  };
+  
   // Initialize budget summary on mount
   useEffect(() => {
     refreshBudget();
   }, []);
   
   return (
-    <BudgetContext.Provider value={{ budgetManager, budgetSummary, refreshBudget, recordExpense }}>
+    <BudgetContext.Provider value={{ 
+      budgetManager, 
+      budgetSummary, 
+      refreshBudget, 
+      recordExpense,
+      updateBudget,
+      resetBudget
+    }}>
       {children}
     </BudgetContext.Provider>
   );

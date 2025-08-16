@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useBudget } from '../../context/BudgetContext';
-import type { BudgetAllocation } from '../../budget';
+import type { ExtendedBudgetAllocation } from '../../budget/extended-types';
 
 interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSend: (amount: string, recipient: string, allocation: BudgetAllocation) => void;
+  onSend: (amount: string, recipient: string, allocation: ExtendedBudgetAllocation) => void;
   isLoading?: boolean;
 }
 
@@ -23,7 +23,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({
   const { budgetSummary } = useBudget();
   const [amount, setAmount] = useState('1.00');
   const [recipient, setRecipient] = useState('0x16520479fd477d5A2E5481b56cFC0E79E156159E');
-  const [selectedAllocation, setSelectedAllocation] = useState<BudgetAllocation | null>(null);
+  const [selectedAllocation, setSelectedAllocation] = useState<ExtendedBudgetAllocation | null>(null);
   
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
